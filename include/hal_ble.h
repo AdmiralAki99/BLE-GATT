@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include "esp_log.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -12,7 +13,6 @@
 // Hardware Specific Libraries
 
 #include "esp_system.h"
-#include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_bt.h"
 
@@ -41,7 +41,7 @@
     @return 
             - ESP_GATT_OK : Success - otherwise, error code
 */
-esp_gatt_status_t hal_ble_get_attr_value(uint16_t attr_handle,uint16_t *attribute_length,uint8_t *attribute_value);
+esp_gatt_status_t hal_ble_get_attr_value(uint16_t attr_handle,uint16_t *attribute_length,const uint8_t **attribute_value);
 
 /*!
     @brief Set Attribute Value
@@ -264,11 +264,128 @@ esp_err_t hal_ble_send_gatt_response(uint16_t gatt_if,uint16_t conn_id,uint32_t 
     @return
             - ESP_OK : Success - otherwise, error code
 */
-esp_err_t hal_ble_create_service(uint16_t gatt_if,uint16_t *service_id,uint16_t num_handles);
+esp_err_t hal_ble_create_service(uint16_t gatt_if,esp_gatt_srvc_id_t* service_uuid,uint16_t num_handles);
 
+/*!
+    @brief Create Service ID
+    @param service_id : The Service ID
+    @return
+            - The Service ID
+*/
+esp_gatt_srvc_id_t hal_ble_create_service_id(uint16_t service_id);
 
+/*!
+    @brief Create Connection Parameters
+    @param min_interval : The minimum interval
+    @param max_interval : The maximum interval
+    @param latency : The latency
+    @param timeout : The timeout
+    @return
+            - The connection parameters
+*/
+esp_ble_conn_update_params_t hal_ble_create_conn_params(uint16_t min_interval,uint16_t max_interval,uint16_t latency,uint16_t timeout);
 
+/*!
+    @brief Create UUID
+    @param uuid : The UUID
+    @param len : The length of the UUID
+    @return
+            - The UUID
+*/
 
+esp_bt_uuid_t hal_ble_create_uuid(uint16_t uuid,uint8_t len);
 
+/*!
+    @brief Create GATT Response
+    @param handle : The handle
+    @param length : The length of the value
+    @param value : The value
+    @return
+            - The GATT Response
+*/
 
+esp_gatt_rsp_t hal_ble_create_gatt_response(uint16_t handle,uint16_t length,uint8_t *value);
+
+/*!
+    @brief Add Characteristic Descriptor
+    @param service_handle : The service handle
+    @param cccd_uuid : The UUID of the characteristic descriptor
+    @param permissions : The permissions of the characteristic descriptor
+    @param initial_value : The initial value of the characteristic descriptor
+    @return
+            - ESP_OK : Success - otherwise, error code
+*/
+
+esp_err_t hal_ble_add_char_descriptor(uint16_t service_handle,esp_bt_uuid_t* cccd_uuid,esp_gatt_perm_t permissions,uint16_t initial_value);
+
+/*!
+    @brief Create Permissions
+    @param read : The read permission
+    @param write : The write permission
+    @return
+            - The permissions
+*/
+esp_gatt_perm_t hal_ble_create_permissions(bool read,bool write);
+
+/*!
+    @brief Create Characteristic Property
+    @param read : The read property
+    @param write : The write property
+    @param notify : The notify property
+    @param indicate : The indicate property
+    @return
+            - The properties
+*/
+esp_gatt_char_prop_t hal_ble_create_characteristic_property(bool read,bool write,bool notify,bool indicate);
+
+/*!
+    @brief Start Service
+    @param service_handle : The service handle
+    @return
+            - ESP_OK : Success - otherwise, error code
+*/
+esp_err_t hal_ble_start_service(uint16_t service_handle);
+
+esp_err_t hal_ble_send_indicate(uint16_t gatt_if,uint16_t conn_id,uint16_t char_handle,uint16_t length,uint8_t *value){
+    esp_err_t err = esp_ble_gatts_send_indicate(gatt_if,conn_id,char_handle,length,value,true);
+
+    return err;
+}
+
+// esp_err_t hal_ble_send_notification(uint16_t gatt_if,uint16_t conn_id,uint16_t char_handle,uint16_t length,uint8_t *value){
+//     esp_err_t err = esp_ble_gatts_send_indicate(gatt_if,conn_id,char_handle,length,value,false);
+
+//     return err;
+// }
+
+void hal_start_light_sleep(){
+    esp_light_sleep_start();
+}
+
+const char* hal_err_to_string(esp_err_t err){
+    return esp_err_to_name(err);
+}
+
+esp_err_t hal_sleep_enable_timer(uint64_t time_in_us){
+    esp_err_t err = esp_sleep_enable_timer_wakeup(time_in_us);
+    return err;
+}
+
+esp_err_t hal_sleep_set_pd_config(esp_sleep_pd_domain_t pd_domain,esp_sleep_pd_option_t pd_option){
+    esp_err_t err = esp_sleep_pd_config(pd_domain,pd_option);
+
+    return err;
+}
+
+size_t hal_get_free_heap_size(){
+    return xPortGetFreeHeapSize();
+}
+
+BaseType_t hal_get_task_stack_high_water_mark(TaskHandle_t task){
+    return uxTaskGetStackHighWaterMark(task);
+}
+
+BaseType_t hal_os_create_task_pinned_to_core(TaskFunction_t task,const char *name,uint32_t stack_size,void *param,UBaseType_t priority,TaskHandle_t *task_handle,uint32_t core_id){
+    return xTaskCreatePinnedToCore(task,name,stack_size,param,priority,task_handle,core_id);
+}
 

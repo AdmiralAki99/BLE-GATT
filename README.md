@@ -119,7 +119,7 @@ This BLE server is designed to integrate seamlessly with other smartwatch compon
 - **LVGL UI Library:** Displays Information based on the BLE profile on a graphical interface.
 
 ## **License**
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the GPL-3.0 License. See the LICENSE file for details.
 
 ## **Acknowledgments**
 Special thanks to the ESP-IDF community and contributors for providing robust BLE support.

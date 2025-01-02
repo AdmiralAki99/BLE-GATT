@@ -3,6 +3,7 @@
 This repository showcases a BLE Server component designed specifically for a smartwatch project. It is made in a modular layered embedded architecture for easier feature addition and changing the logic or swapping MCU's.
 
 ## **Layered Architecture**
+![Layered Embedded Software drawio](https://github.com/user-attachments/assets/51eff44a-411d-40f7-83f4-b358c3dd2ae1)
 
 ## **Features**
 
